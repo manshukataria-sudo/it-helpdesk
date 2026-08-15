@@ -5,6 +5,7 @@ const {
   getMyTickets,
   getTicketById,
   getAllTickets,
+  assignTicket,
 } = require("../controllers/ticketController");
 const authorizeRoles = require("../middleware/roleMiddleware");
 const router = express.Router();
@@ -16,6 +17,12 @@ router.get(
   protect,
   authorizeRoles("admin"),
   getAllTickets
+);
+router.patch(
+  "/:id/assign",
+  protect,
+  authorizeRoles("admin"),
+  assignTicket
 );
 router.get("/:id", protect, getTicketById);
 module.exports = router;
