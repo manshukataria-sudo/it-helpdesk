@@ -64,32 +64,53 @@ const getTicketById = async (req, res) => {
     if (!ticket) {
       return res.status(404).json({
         success: false,
-        message: "Ticket not found"
+        message: "Ticket not found",
       });
     }
 
-    const isOwner =
-      ticket.createdBy._id.toString() === req.user.userId;
+    const isOwner = ticket.createdBy._id.toString() === req.user.userId;
 
     const isAdmin = req.user.role === "admin";
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
-        message: "You are not allowed to view this ticket"
+        message: "You are not allowed to view this ticket",
       });
     }
 
     res.status(200).json({
       success: true,
-      ticket
+      ticket,
     });
   } catch (error) {
     console.error("Get ticket error:", error.message);
 
     res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server error",
+    });
+  }
+};
+
+const getAllTickets = async (req, res) => {
+  try {
+    const tickets = await Ticket.find()
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: tickets.length,
+      tickets,
+    });
+  } catch (error) {
+    console.error("Get all tickets error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
     });
   }
 };
@@ -97,5 +118,6 @@ const getTicketById = async (req, res) => {
 module.exports = {
   createTicket,
   getMyTickets,
-  getTicketById
+  getTicketById,
+  getAllTickets,
 };
