@@ -1,5 +1,8 @@
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
+const { isValidTransition } = require("../services/ticketService");
+
+
 
 const createTicket = async (req, res) => {
   try {
@@ -177,6 +180,60 @@ const assignTicket = async (req, res) => {
   }
 };
 
+const updateTicketStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    const ticket = await Ticket.findById(req.params.id);
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
+    const isAdmin = req.user.role === "admin";
+
+    if (!isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Only admins can update ticket status",
+      });
+    }
+
+    if (!isValidTransition(ticket.status, status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status transition from ${ticket.status} to ${status}`,
+      });
+    }
+
+    ticket.status = status;
+
+    await ticket.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket status updated successfully",
+      ticket,
+    });
+  } catch (error) {
+    console.error("Update ticket status error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 
 module.exports = {
   createTicket,
@@ -184,4 +241,5 @@ module.exports = {
   getTicketById,
   getAllTickets,
   assignTicket,
+  updateTicketStatus,
 };
