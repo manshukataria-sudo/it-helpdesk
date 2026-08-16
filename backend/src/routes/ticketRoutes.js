@@ -10,6 +10,7 @@ const {
   getAllTickets,
   assignTicket,
   updateTicketStatus,
+  resolveTicket,
 } = require("../controllers/ticketController");
 
 const router = express.Router();
@@ -37,6 +38,13 @@ router.patch(
   protect,
   authorizeRoles("admin"),
   updateTicketStatus
+);
+
+router.patch(
+  "/:id/resolve",
+  protect,
+  authorizeRoles("admin"),
+  resolveTicket
 );
 
 router.get("/:id", protect, getTicketById);

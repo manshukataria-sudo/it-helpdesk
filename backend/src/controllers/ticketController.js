@@ -235,6 +235,53 @@ const updateTicketStatus = async (req, res) => {
   }
 };
 
+const resolveTicket = async (req, res) => {
+  try {
+    const { resolution } = req.body;
+
+    if (!resolution || !resolution.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Resolution is required",
+      });
+    }
+
+    const ticket = await Ticket.findById(req.params.id);
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
+    if (ticket.status !== "in_progress") {
+      return res.status(400).json({
+        success: false,
+        message: "Only in-progress tickets can be resolved",
+      });
+    }
+
+    ticket.resolution = resolution.trim();
+    ticket.status = "resolved";
+
+    await ticket.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket resolved successfully",
+      ticket,
+    });
+  } catch (error) {
+    console.error("Resolve ticket error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 module.exports = {
   createTicket,
   getMyTickets,
@@ -242,4 +289,5 @@ module.exports = {
   getAllTickets,
   assignTicket,
   updateTicketStatus,
+  resolveTicket,
 };
