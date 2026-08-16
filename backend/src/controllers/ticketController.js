@@ -282,6 +282,43 @@ const resolveTicket = async (req, res) => {
   }
 };
 
+const getTicketStats = async (req, res) => {
+  try {
+    const stats = await Ticket.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const result = {
+      open: 0,
+      assigned: 0,
+      in_progress: 0,
+      resolved: 0,
+      closed: 0,
+    };
+
+    stats.forEach((item) => {
+      result[item._id] = item.count;
+    });
+
+    res.status(200).json({
+      success: true,
+      stats: result,
+    });
+  } catch (error) {
+    console.error("Ticket stats error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 module.exports = {
   createTicket,
   getMyTickets,
@@ -290,4 +327,5 @@ module.exports = {
   assignTicket,
   updateTicketStatus,
   resolveTicket,
+  getTicketStats,
 };

@@ -11,6 +11,7 @@ const {
   assignTicket,
   updateTicketStatus,
   resolveTicket,
+  getTicketStats
 } = require("../controllers/ticketController");
 
 const router = express.Router();
@@ -47,6 +48,14 @@ router.patch(
   resolveTicket
 );
 
+router.get(
+  "/stats",
+  protect,
+  authorizeRoles("admin"),
+  getTicketStats
+);
+
+// Employee owner OR Admin
 router.get("/:id", protect, getTicketById);
 
 module.exports = router;
