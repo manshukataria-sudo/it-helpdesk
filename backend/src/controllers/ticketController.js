@@ -237,7 +237,7 @@ const updateTicketStatus = async (req, res) => {
 
 const resolveTicket = async (req, res) => {
   try {
-    const { resolution } = req.body;
+    const { resolution } = req.body || {};
 
     if (!resolution || !resolution.trim()) {
       return res.status(400).json({
