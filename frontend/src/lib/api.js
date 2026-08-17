@@ -1,32 +1,45 @@
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000/api";
 
-export const apiRequest = async (
-  endpoint,
-  options = {}
-) => {
+export const apiRequest = async (endpoint, options = {}) => {
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("token")
       : null;
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const url = `${API_URL}${endpoint}`;
+
+  console.log("API Request:", url);
+
+  const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {}),
+
+      ...(token && {
+        Authorization: `Bearer ${token}`,
+      }),
+
       ...options.headers,
     },
   });
 
-  const data = await response.json();
+  const text = await response.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = {
+      message: text || "Invalid server response",
+    };
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    console.error("API Error:", response.status, data);
+    throw new Error(data.message || "Request failed");
   }
 
   return data;
