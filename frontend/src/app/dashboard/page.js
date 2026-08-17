@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../lib/api";
 import Link from "next/link";
-
+import LogoutButton from "../../components/LogoutButton";
 export default function Dashboard() {
   const [tickets, setTickets] = useState([]);
   const [error, setError] = useState("");
@@ -41,6 +41,7 @@ export default function Dashboard() {
           >
             Create Ticket
           </Link>
+          <LogoutButton/>
         </div>
 
         {error && (

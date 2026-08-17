@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../lib/api";
-
+import LogoutButton from "../../components/LogoutButton";
 export default function AdminDashboard() {
   const [tickets, setTickets] = useState([]);
   const [stats, setStats] = useState(null);
@@ -120,6 +120,7 @@ export default function AdminDashboard() {
           <p className="text-gray-500 mt-1">
             Manage and resolve IT support tickets
           </p>
+          <LogoutButton/>
         </div>
 
         {error && (
