@@ -21,7 +21,7 @@ export default function AdminDashboard() {
         await Promise.all([
           apiRequest("/tickets/all"),
           apiRequest("/tickets/stats"),
-          apiRequest("/users"),
+          apiRequest("/users/admins"),
         ]);
 
       setTickets(ticketsData.tickets || []);
