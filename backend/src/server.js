@@ -13,8 +13,14 @@ const errorHandler = require("./middleware/errorMiddleware");
 dotenv.config();
 
 const app = express();
-
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://it-helpdesk-frontend-msk-bpakg8ahh3ftc7h9.centralindia-01.azurewebsites.net",
+    ],
+  })
+);
 app.use(helmet());
 app.use(express.json());
 
