@@ -1,4 +1,4 @@
-name: Build and deploy backend to Azure Web App - it-helpdesk-msk
+name: Build and deploy frontend to Azure Web App - it-helpdesk-frontend-msk
 
 on:
   push:
@@ -9,48 +9,49 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.x'
+          node-version: "24.x"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm install
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
 
-      - name: Build backend
-        working-directory: backend
-        run: npm run build --if-present
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
 
-      - name: Test backend
-        working-directory: backend
-        run: npm run test --if-present
-
-      - name: Upload backend artifact
+      - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
-          name: backend
-          path: backend
+          name: frontend
+          path: frontend
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Download backend artifact
+      - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
-          name: backend
-          path: backend
+          name: frontend
+          path: frontend
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -62,6 +63,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'it-helpdesk-msk'
-          slot-name: 'Production'
-          package: backend
+          app-name: "it-helpdesk-frontend-msk"
+          slot-name: "Production"
+          package: frontend
