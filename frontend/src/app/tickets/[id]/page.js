@@ -6,10 +6,12 @@ import { apiRequest } from "../../../lib/api";
 
 export default function TicketDetails() {
   const params = useParams();
+
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [downloading, setDownloading] = useState(null);
 
   useEffect(() => {
     if (!params.id) return;
@@ -17,7 +19,6 @@ export default function TicketDetails() {
     const loadData = async () => {
       try {
         const ticketData = await apiRequest(`/tickets/${params.id}`);
-
         const commentData = await apiRequest(`/comments/${params.id}`);
 
         setTicket(ticketData.ticket);
@@ -49,6 +50,56 @@ export default function TicketDetails() {
       setComments(commentData.comments);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const downloadAttachment = async (attachment) => {
+    try {
+      setDownloading(attachment.blobName);
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/tickets/${params.id}/attachments/${encodeURIComponent(
+          attachment.blobName,
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+
+        console.error("Download API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        });
+
+        throw new Error(`Download failed (${response.status}): ${errorText}`);
+      }
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = attachment.fileName;
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Attachment download error:", err);
+      setError(err.message);
+    } finally {
+      setDownloading(null);
     }
   };
 
@@ -108,7 +159,43 @@ export default function TicketDetails() {
           {ticket.resolution && (
             <div className="mt-6 p-4 bg-green-50 rounded">
               <strong>Resolution</strong>
+
               <p className="mt-2">{ticket.resolution}</p>
+            </div>
+          )}
+
+          {/* Attachments */}
+          {ticket.attachments?.length > 0 && (
+            <div className="mt-6 border-t pt-6">
+              <h2 className="text-xl font-bold mb-4">Attachments</h2>
+
+              <div className="space-y-3">
+                {ticket.attachments.map((attachment) => (
+                  <div
+                    key={attachment.blobName}
+                    className="flex items-center justify-between border rounded-lg p-4"
+                  >
+                    <div>
+                      <p className="font-medium">📎 {attachment.fileName}</p>
+
+                      <p className="text-sm text-gray-500 mt-1">
+                        {attachment.contentType} ·{" "}
+                        {(attachment.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => downloadAttachment(attachment)}
+                      disabled={downloading === attachment.blobName}
+                      className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+                    >
+                      {downloading === attachment.blobName
+                        ? "Downloading..."
+                        : "Download"}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
