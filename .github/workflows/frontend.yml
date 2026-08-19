@@ -55,7 +55,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Download frontend artifact
+      - name: Download frontend
         uses: actions/download-artifact@v4
         with:
           name: frontend
@@ -67,15 +67,6 @@ jobs:
           client-id: ${{ secrets.__clientidsecretname__frontend }}
           tenant-id: ${{ secrets.__tenantidsecretname__frontend }}
           subscription-id: ${{ secrets.__subscriptionidsecretname__frontend }}
-
-      - name: Enable Azure build automation
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az webapp config appsettings set \
-              --resource-group rg-it-helpdesk \
-              --name it-helpdesk-frontend-msk \
-              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
 
       - name: Deploy frontend to Azure
         uses: azure/webapps-deploy@v3
