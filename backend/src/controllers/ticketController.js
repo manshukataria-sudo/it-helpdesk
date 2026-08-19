@@ -1,7 +1,8 @@
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const { isValidTransition } = require("../services/ticketService");
-const { uploadToBlob, downloadFromBlob } = require("../services/blobService");
+const { uploadToBlob } = require("../services/blobService");
+const { containerClient } = require("../config/azureBlob");
 
 const createTicket = async (req, res) => {
   try {
@@ -99,6 +100,87 @@ const getTicketById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error",
+    });
+  }
+};
+
+const downloadAttachment = async (req, res) => {
+  try {
+    const { id, blobName } = req.params;
+
+    const ticket = await Ticket.findById(id);
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
+    const isOwner =
+      ticket.createdBy.toString() === req.user.userId;
+
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to download this attachment",
+      });
+    }
+
+    const attachment = ticket.attachments.find(
+      (item) => item.blobName === blobName
+    );
+
+    if (!attachment) {
+      return res.status(404).json({
+        success: false,
+        message: "Attachment not found",
+      });
+    }
+
+    const blockBlobClient =
+      containerClient.getBlockBlobClient(blobName);
+
+    const exists = await blockBlobClient.exists();
+
+    if (!exists) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found in Azure Blob Storage",
+      });
+    }
+
+    const downloadResponse =
+      await blockBlobClient.download();
+
+    res.setHeader(
+      "Content-Type",
+      attachment.contentType || "application/octet-stream"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename*=UTF-8''${encodeURIComponent(
+        attachment.fileName
+      )}`
+    );
+
+    if (attachment.size) {
+      res.setHeader("Content-Length", attachment.size);
+    }
+
+    downloadResponse.readableStreamBody.pipe(res);
+  } catch (error) {
+    console.error(
+      "Download attachment error:",
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to download attachment",
     });
   }
 };
@@ -320,61 +402,6 @@ const getTicketStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error",
-    });
-  }
-};
-
-const downloadAttachment = async (req, res) => {
-  try {
-    const { ticketId, blobName } = req.params;
-
-    const ticket = await Ticket.findById(ticketId);
-
-    if (!ticket) {
-      return res.status(404).json({
-        success: false,
-        message: "Ticket not found",
-      });
-    }
-
-    const isOwner = ticket.createdBy.toString() === req.user.userId;
-
-    const isAdmin = req.user.role === "admin";
-
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not allowed to access this attachment",
-      });
-    }
-
-    const attachment = ticket.attachments.find(
-      (item) => item.blobName === blobName,
-    );
-
-    if (!attachment) {
-      return res.status(404).json({
-        success: false,
-        message: "Attachment not found",
-      });
-    }
-
-    const downloadResponse = await downloadFromBlob(blobName);
-
-    res.setHeader("Content-Type", attachment.contentType);
-
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${attachment.fileName}"`,
-    );
-
-    downloadResponse.readableStreamBody.pipe(res);
-  } catch (error) {
-    console.error("Download attachment error:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to download attachment",
     });
   }
 };

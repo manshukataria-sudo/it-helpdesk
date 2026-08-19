@@ -38,9 +38,8 @@ router.patch("/:id/resolve", protect, authorizeRoles("admin"), resolveTicket);
 router.get("/stats", protect, authorizeRoles("admin"), getTicketStats);
 
 
-
 router.get(
-  "/:ticketId/attachments/:blobName",
+  "/:id/attachments/:blobName",
   protect,
   downloadAttachment
 );
