@@ -1,7 +1,7 @@
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const { isValidTransition } = require("../services/ticketService");
-
+const { uploadToBlob } = require("../services/blobService");
 
 
 const createTicket = async (req, res) => {
@@ -15,12 +15,19 @@ const createTicket = async (req, res) => {
       });
     }
 
+    let attachment = null;
+
+    if (req.file) {
+      attachment = await uploadToBlob(req.file);
+    }
+
     const ticket = await Ticket.create({
       title,
       description,
       category,
       priority: priority || "medium",
       createdBy: req.user.userId,
+      attachments: attachment ? [attachment] : [],
     });
 
     res.status(201).json({

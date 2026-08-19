@@ -5,37 +5,37 @@ const ticketSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
     description: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
-category: {
-  type: String,
-  enum: [
-    "hardware",
-    "software",
-    "network",
-    "access",
-    "other",
-  ],
-  required: true,
-},
+    category: {
+      type: String,
+      enum: [
+        "hardware",
+        "software",
+        "network",
+        "access",
+        "other",
+      ],
+      required: true,
+    },
 
-priority: {
-  type: String,
-  enum: [
-    "low",
-    "medium",
-    "high",
-    "urgent",
-  ],
-  default: "medium",
-},
+    priority: {
+      type: String,
+      enum: [
+        "low",
+        "medium",
+        "high",
+        "urgent",
+      ],
+      default: "medium",
+    },
 
     status: {
       type: String,
@@ -44,30 +44,51 @@ priority: {
         "assigned",
         "in_progress",
         "resolved",
-        "closed"
+        "closed",
       ],
-      default: "open"
+      default: "open",
     },
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
     },
 
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      default: null
+      default: null,
     },
 
     resolution: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
+
+    attachments: [
+      {
+        fileName: {
+          type: String,
+          required: true,
+        },
+        blobName: {
+          type: String,
+          required: true,
+        },
+        contentType: {
+          type: String,
+          required: true,
+        },
+        size: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

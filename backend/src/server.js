@@ -1,6 +1,9 @@
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const helmet = require("helmet");
 const connectDB = require("./config/db");
 
@@ -10,9 +13,8 @@ const ticketRoutes = require("./routes/ticketRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const errorHandler = require("./middleware/errorMiddleware");
 
-dotenv.config();
-
 const app = express();
+
 app.use(
   cors({
     origin: [
@@ -21,6 +23,7 @@ app.use(
     ],
   })
 );
+
 app.use(helmet());
 app.use(express.json());
 

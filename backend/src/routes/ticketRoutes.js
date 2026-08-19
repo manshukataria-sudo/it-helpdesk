@@ -2,6 +2,7 @@ const express = require("express");
 
 const protect = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 const {
   createTicket,
@@ -11,49 +12,29 @@ const {
   assignTicket,
   updateTicketStatus,
   resolveTicket,
-  getTicketStats
+  getTicketStats,
 } = require("../controllers/ticketController");
 
 const router = express.Router();
 
-router.post("/", protect, createTicket);
+router.post("/", protect, upload.single("attachment"), createTicket);
 
 router.get("/", protect, getMyTickets);
 
-router.get(
-  "/all",
-  protect,
-  authorizeRoles("admin"),
-  getAllTickets
-);
+router.get("/all", protect, authorizeRoles("admin"), getAllTickets);
 
-router.patch(
-  "/:id/assign",
-  protect,
-  authorizeRoles("admin"),
-  assignTicket
-);
+router.patch("/:id/assign", protect, authorizeRoles("admin"), assignTicket);
 
 router.patch(
   "/:id/status",
   protect,
   authorizeRoles("admin"),
-  updateTicketStatus
+  updateTicketStatus,
 );
 
-router.patch(
-  "/:id/resolve",
-  protect,
-  authorizeRoles("admin"),
-  resolveTicket
-);
+router.patch("/:id/resolve", protect, authorizeRoles("admin"), resolveTicket);
 
-router.get(
-  "/stats",
-  protect,
-  authorizeRoles("admin"),
-  getTicketStats
-);
+router.get("/stats", protect, authorizeRoles("admin"), getTicketStats);
 
 // Employee owner OR Admin
 router.get("/:id", protect, getTicketById);
