@@ -12,17 +12,23 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   console.log("API Request:", url);
 
+  const isFormData = options.body instanceof FormData;
+
+  const headers = {
+    ...(token && {
+      Authorization: `Bearer ${token}`,
+    }),
+
+    ...options.headers,
+  };
+
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-
-      ...(token && {
-        Authorization: `Bearer ${token}`,
-      }),
-
-      ...options.headers,
-    },
+    headers,
   });
 
   const text = await response.text();
