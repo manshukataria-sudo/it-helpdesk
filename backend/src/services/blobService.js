@@ -25,6 +25,22 @@ const uploadToBlob = async (file) => {
   };
 };
 
+const downloadFromBlob = async (blobName) => {
+  const blockBlobClient =
+    containerClient.getBlockBlobClient(blobName);
+
+  const exists = await blockBlobClient.exists();
+
+  if (!exists) {
+    throw new Error("File not found in Azure Blob Storage");
+  }
+
+  const downloadResponse = await blockBlobClient.download();
+
+  return downloadResponse;
+};
+
 module.exports = {
   uploadToBlob,
+  downloadFromBlob,
 };

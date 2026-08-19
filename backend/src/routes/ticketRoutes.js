@@ -13,6 +13,7 @@ const {
   updateTicketStatus,
   resolveTicket,
   getTicketStats,
+  downloadAttachment,
 } = require("../controllers/ticketController");
 
 const router = express.Router();
@@ -36,6 +37,13 @@ router.patch("/:id/resolve", protect, authorizeRoles("admin"), resolveTicket);
 
 router.get("/stats", protect, authorizeRoles("admin"), getTicketStats);
 
+
+
+router.get(
+  "/:ticketId/attachments/:blobName",
+  protect,
+  downloadAttachment
+);
 // Employee owner OR Admin
 router.get("/:id", protect, getTicketById);
 
