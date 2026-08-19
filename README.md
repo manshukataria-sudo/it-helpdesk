@@ -1,76 +1,52 @@
 # IT Helpdesk Management System
 
-A full-stack IT helpdesk platform for submitting, managing, assigning, and resolving technical support tickets.
+A full-stack IT Helpdesk Management System for submitting, managing, assigning, tracking, and resolving technical support tickets.
+
+The application provides separate employee and administrator workflows with JWT-based authentication, role-based authorization, ticket management, and a production deployment using Microsoft Azure and MongoDB Atlas.
+
+## Live Demo
+
+**Frontend:**  
+https://it-helpdesk-frontend-msk-bpakg8ahh3ftc7h9.centralindia-01.azurewebsites.net/
 
 ## Features
 
+### Authentication & Authorization
 - User registration and login
-- JWT authentication
+- JWT-based authentication
 - Role-based access control
-- Employee ticket creation
-- Employee ticket history
+- Protected routes
+- Password hashing using bcrypt
 - Ticket ownership authorization
-- Admin ticket management
-- Ticket assignment
-- Ticket status workflow
-- Ticket resolution
-- Ticket comments
+
+### Employee Features
+- Create support tickets
+- View submitted tickets
+- View ticket history
+- Track ticket status
+- View ticket details
+- Add comments to tickets
+
+### Admin Features
 - Admin dashboard
-- Ticket statistics
+- View all support tickets
+- Assign tickets
+- Manage ticket status
+- Resolve tickets
+- Close tickets
+- Add comments
+- View ticket statistics
 
-## Tech Stack
+### Ticket Management
+Tickets follow a structured lifecycle:
 
-### Frontend
-- Next.js
-- React
-- Tailwind CSS
-
-### Backend
-- Node.js
-- Express.js
-- JWT
-- bcrypt
-
-### Database
-- MongoDB
-- Mongoose
-
-### Security
-- JWT authentication
-- Role-based authorization
-- bcrypt password hashing
-- Helmet
-- CORS
-
-## Ticket Lifecycle
-
-open
-→ assigned
-→ in_progress
-→ resolved
-→ closed
-
-## Architecture
-
-Next.js
-↓
-Express REST API
-↓
-Controllers
-↓
-Mongoose
-↓
-MongoDB Atlas
-
-## Running Locally
-
-### Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-
-cd frontend
-npm install
-npm run dev
+```text
+Open
+  ↓
+Assigned
+  ↓
+In Progress
+  ↓
+Resolved
+  ↓
+Closed
