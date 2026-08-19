@@ -1,9 +1,12 @@
-name: Build and deploy frontend to Azure Web App - it-helpdesk-frontend-msk
+name: Deploy frontend to Azure
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend.yml"
   workflow_dispatch:
 
 jobs:
@@ -24,7 +27,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         working-directory: frontend
         run: npm ci
 
@@ -56,11 +59,11 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy frontend to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: "it-helpdesk-frontend-msk"
